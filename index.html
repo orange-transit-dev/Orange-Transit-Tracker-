@@ -127,7 +127,7 @@ button {
         <button onclick="resetBus()" style="background-color: #27ae60;">Reset to On-Time</button>
     </div>
 
-    <script>
+  <script>
         let fleetData = {
             "14": {
                 "route_status": "On Time", 
@@ -135,16 +135,27 @@ button {
                 "estimated_arrival_time": "7:10 AM"
             },
             "22": {
-                "route_status": "Delayed", 
-                "minutes_delayed": 15,
-                "estimated_arrival_time": "7:40 AM"
+                "route_status": "On Time", 
+                "minutes_delayed": 0,
+                "estimated_arrival_time": "7:25 AM"
             }
         };
 
-        let currentBus = "14";
+        // 1. Check if a saved bus exists in browser memory; if not, default to "14"
+        let savedBus = localStorage.getItem('userSavedBus');
+        let currentBus = savedBus ? savedBus : "14";
 
-        document.getElementById('bus').addEventListener('change', function(event) {
+        // 2. Set the dropdown menu value on load to match the saved bus
+        const busDropdown = document.getElementById('bus');
+        busDropdown.value = "Bus " + currentBus;
+
+        // 3. Listen for changes and write the new choice to localStorage
+        busDropdown.addEventListener('change', function(event) {
             currentBus = event.target.value.replace("Bus ", "");
+            
+            // SAVE TO BROWSER MEMORY HERE:
+            localStorage.setItem('userSavedBus', currentBus);
+            
             updateUI();
         });
 
@@ -167,15 +178,13 @@ button {
             }
         }
 
-       function triggerDelay() {
-    fleetData[currentBus].route_status = "Delayed";
-    fleetData[currentBus].minutes_delayed = 10;
-    
-    // Set ETA based on which bus is currently selected
-    fleetData[currentBus].estimated_arrival_time = currentBus === "14" ? "7:20 AM" : "7:35 AM";
-    
-    updateUI();
-}
+        function triggerDelay() {
+            fleetData[currentBus].route_status = "Delayed";
+            fleetData[currentBus].minutes_delayed = 10;
+            fleetData[currentBus].estimated_arrival_time = currentBus === "14" ? "7:20 AM" : "7:35 AM";
+            updateUI();
+        }
+
         function resetBus() {
             fleetData[currentBus].route_status = "On Time";
             fleetData[currentBus].minutes_delayed = 0;
@@ -187,6 +196,9 @@ button {
             const devPanel = document.getElementById('dev-panel');
             devPanel.classList.toggle('hidden');
         }
+
+        // Run UI update on page load so it displays the saved bus immediately
+        updateUI();
     </script>
 </body>
 </html>
